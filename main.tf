@@ -1,22 +1,24 @@
 # Copyright (c) HashiCorp, Inc.
 # SPDX-License-Identifier: MPL-2.0
-
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "4.52.0"
-    }
-    random = {
-      source  = "hashicorp/random"
-      version = "3.4.3"
-    }
-  }
-  required_version = ">= 1.1.0"
-}
-
 provider "aws" {
   region = "us-west-2"
+}
+
+module "vpc" {
+  source = "terraform-aws-modules/vpc/aws"
+  version = "5.0.0"
+
+  name = var.vpc_name
+  cidr = var.vpc_cidr
+
+
+  azs             = var.vpc_azs
+  private_subnets = var.vpc_private_subnets
+  public_subnets  = var.vpc_public_subnets
+
+  enable_nat_gateway = var.vpc_enable_nat_gateway
+
+  tags = var.vpc_tags
 }
 
 resource "random_pet" "sg" {}
@@ -37,10 +39,25 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
-resource "aws_instance" "web" {
+module "ec2_instance" {
+  source  = "terraform-aws-modules/ec2-instance/aws"
+  version = "4.3.0"
+
+  count = 2
+
+  name = "instance-${count.index}"
+
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = "t2.micro"
-  vpc_security_group_ids = [aws_security_group.web-sg.id]
+  key_name               = "user1"
+  monitoring             = true
+  vpc_security_group_ids = [module.vpc.default_security_group_id]
+  subnet_id              = module.vpc.public_subnets[0]
+
+  tags = {
+    Terraform   = "true"
+    Environment = "dev"
+  }
 
   user_data = <<-EOF
               #!/bin/bash
@@ -49,7 +66,7 @@ resource "aws_instance" "web" {
               sed -i -e 's/80/8080/' /etc/apache2/ports.conf
               echo "Hello World" > /var/www/html/index.html
               systemctl restart apache2
-              EOF
+              EOF 
 }
 
 resource "aws_security_group" "web-sg" {
@@ -69,6 +86,6 @@ resource "aws_security_group" "web-sg" {
   }
 }
 
-output "web-address" {
+/* output "web-address" {
   value = "${aws_instance.web.public_dns}:8080"
-}
+} */
