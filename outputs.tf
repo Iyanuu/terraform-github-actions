@@ -8,7 +8,7 @@ output "ec2_instance_public_ips" {
   value       = module.ec2_instance[*].public_ip
 }
 
-output "web-address" {
+ output "web-address" {
   description = "web addresses of EC2 instances"
-  value       = "${module.ec2_instance[*].public_dns}:8080"
-}
+  value       = module.ec2_instance[*].public_ip
+} 
