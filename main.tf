@@ -88,7 +88,7 @@ resource "aws_security_group" "web-sg" {
 module "website_s3_bucket" {
   source = "./modules/aws-s3-static-bucket"
   
-  bucket_name = "terraform_s3_bucket_module-05-12-23"
+  bucket_name = "terraform-s3-bucket-module-05-12-23"
   
   tags = {
     Terraform = "true"
