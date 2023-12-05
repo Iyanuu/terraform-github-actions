@@ -48,7 +48,7 @@ module "ec2_instance" {
   name = "instance-${count.index}"
 
   ami                    = data.aws_ami.ubuntu.id
-  instance_type          = "t2.micro"
+  instance_type          = "t6.micro"
   monitoring             = true
   vpc_security_group_ids = [module.vpc.default_security_group_id]
   subnet_id              = module.vpc.public_subnets[0]
@@ -88,7 +88,7 @@ resource "aws_security_group" "web-sg" {
 module "website_s3_bucket" {
   source = "./modules/aws-s3-static-bucket"
   
-  bucket_name = "terraform-s3-bucket-module-05-12-23"
+  bucket_name = "terraform_s3_bucket_module-05-12-23"
   
   tags = {
     Terraform = "true"
