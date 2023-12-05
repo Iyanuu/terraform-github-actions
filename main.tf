@@ -48,7 +48,7 @@ module "ec2_instance" {
   name = "instance-${count.index}"
 
   ami                    = data.aws_ami.ubuntu.id
-  instance_type          = "t2.micro"
+  instance_type          = "t6.micro"
   monitoring             = true
   vpc_security_group_ids = [module.vpc.default_security_group_id]
   subnet_id              = module.vpc.public_subnets[0]
